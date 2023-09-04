@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	config "github.com/siddhantprateek/Trakd/config"
 )
 
@@ -31,7 +32,13 @@ func NewAPI(cfg *config.APIConfiguration) API {
 		),
 		cfg: cfg,
 	}
-
+	svr.fiber.Use(logger.New())
+	svr.fiber.Get("/", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"message":     "Trakd server.",
+			"healthcheck": "ok",
+		})
+	})
 	return &svr
 }
 
@@ -42,7 +49,7 @@ func setDefaults(cfg *config.APIConfiguration) {
 }
 
 func (s *server) Start() {
-	log.Printf("server starting on port %d", s.cfg.Port)
+	log.Printf("server starting on port http://localhost:%d", s.cfg.Port)
 
 	if err := s.fiber.Listen(fmt.Sprintf(":%d", s.cfg.Port)); err != nil {
 		log.Fatalf("server cannot start on port %d", s.cfg.Port)
