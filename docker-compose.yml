@@ -17,6 +17,13 @@ services:
       - rabbitvol:/var/lib/rabbitmq
     networks:
       - broker
+  api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8090
+    
 
 networks:
   broker:
