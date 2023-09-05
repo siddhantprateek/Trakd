@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -46,7 +47,12 @@ func NewAPI(cfg *config.APIConfiguration) API {
 		})
 	})
 
-	rb, err := rbClient.NewRabbitMQClient("amqp://guest:guest@localhost:5672")
+	brokerURL := config.GetEnv("BROKER_URL")
+	if brokerURL == "" {
+		brokerURL = os.Getenv("BROKER_URL")
+	}
+
+	rb, err := rbClient.NewRabbitMQClient(brokerURL)
 	if err != nil {
 		log.Panicln(err)
 	}

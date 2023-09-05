@@ -23,7 +23,12 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 8090
+      - 8090:8090
+    environment:
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+    networks:
+      - monitoring
+      - broker
 
   prometheus:
     image: prom/prometheus:v2.40.4
