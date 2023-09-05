@@ -1,4 +1,4 @@
-![](./assets/trakd.png)
+![](./assets/trakd.jpg)
 
 # Trakd
 
