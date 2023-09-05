@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/gofiber/fiber/v2 v2.49.1
+	github.com/gorilla/websocket v1.5.0
 	github.com/joho/godotenv v1.5.1
 	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/stretchr/testify v1.8.0

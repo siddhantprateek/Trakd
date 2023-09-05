@@ -3,8 +3,10 @@ package broker
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/siddhantprateek/Trakd/internals/consignment"
 )
 
 const (
@@ -37,7 +39,7 @@ func NewRabbitMQClient(connectionString string) (*rabbitmqClient, error) {
 	return c, err
 }
 
-func (c *rabbitmqClient) ConsumeByVechileID(ctx context.Context, vehicleID string) ([]byte, error) {
+func (c *rabbitmqClient) ConsumeByVehicleID(ctx context.Context, vehicleID string) ([]byte, error) {
 	for msg := range c.packageStatus {
 		if msg.MessageId == vehicleID {
 			_ = msg.Ack(false)
@@ -50,6 +52,21 @@ func (c *rabbitmqClient) ConsumeByVechileID(ctx context.Context, vehicleID strin
 func (c *rabbitmqClient) Close() {
 	c.ch.Close()
 	c.conn.Close()
+}
+
+func (c *rabbitmqClient) Publish(ctx context.Context, p consignment.Package) {
+	jsonStr := fmt.Sprintf(`{ "from": %q, "to": %q, "vehicleId": %q }`, p.From, p.To, p.VehicleID)
+
+	_ = c.ch.PublishWithContext(
+		ctx,
+		"",        // exchange
+		QueueName, // routing key
+		false,     // mandatory
+		false,     // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        []byte(jsonStr),
+		})
 }
 
 func (c *rabbitmqClient) configureQueue() error {

@@ -17,18 +17,42 @@ services:
       - rabbitvol:/var/lib/rabbitmq
     networks:
       - broker
+
   api-server:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - 8090
-    
+
+  prometheus:
+    image: prom/prometheus:v2.40.4
+    ports:
+      - 9090:9090
+    networks:
+      - monitoring
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:9.3.0
+    ports:
+      - 3000:3000 
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - monitoring
+    volumes:
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - grafana_data:/var/lib/grafana
 
 networks:
   broker:
     driver: bridge
+  monitoring:
 
 volumes:
   rabbitvol:
     driver: local
+  grafana_data: { }

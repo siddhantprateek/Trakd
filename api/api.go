@@ -1,12 +1,18 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	config "github.com/siddhantprateek/Trakd/config"
+	rbClient "github.com/siddhantprateek/Trakd/internals/broker"
+	"github.com/siddhantprateek/Trakd/internals/consignment"
+	"github.com/siddhantprateek/Trakd/internals/delivery"
+	"github.com/siddhantprateek/Trakd/internals/track"
 )
 
 type API interface {
@@ -39,6 +45,35 @@ func NewAPI(cfg *config.APIConfiguration) API {
 			"healthcheck": "ok",
 		})
 	})
+
+	rb, err := rbClient.NewRabbitMQClient("amqp://guest:guest@localhost:5672")
+	if err != nil {
+		log.Panicln(err)
+	}
+	defer rb.Close()
+
+	// go routines
+	go func() {
+		ctx := context.Background()
+		time.Sleep(3 * time.Second)
+		rb.Publish(ctx, consignment.Package{From: "Bordeaux", To: "Toulouse", VehicleID: "123"})
+		time.Sleep(3 * time.Second)
+		rb.Publish(ctx, consignment.Package{From: "Toulouse", To: "Monaco", VehicleID: "12"})
+		time.Sleep(3 * time.Second)
+		rb.Publish(ctx, consignment.Package{From: "Monaco", To: "Lyon", VehicleID: "123"})
+		time.Sleep(3 * time.Second)
+		rb.Publish(ctx, consignment.Package{From: "Lyon", To: "Paris", VehicleID: "123"})
+		time.Sleep(3 * time.Second)
+		rb.Publish(ctx, consignment.Package{From: "Paris", To: "Brussels", VehicleID: "123"})
+		time.Sleep(3 * time.Second)
+		rb.Publish(ctx, consignment.Package{From: "Brussels", To: "Rotterdam", VehicleID: "123"})
+		time.Sleep(3 * time.Second)
+		rb.Publish(ctx, consignment.Package{From: "Rotterdam", To: "Amsterdam", VehicleID: "123"})
+	}()
+
+	pub := track.NewConsignmentTrack(rb)
+	delivery.NewConsignmentHandler(svr.fiber, pub)
+
 	return &svr
 }
 
