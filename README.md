@@ -8,7 +8,8 @@
 
 - [Go]()
 - [Go Fiber]()
-- [RabbitMQ]()
+- [RabbitMQ]() Message Broker
+- [Terraform]() Infrastructure as Code (IaC)
 
 ## Running application using `docker-compose`
 
