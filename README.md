@@ -10,6 +10,8 @@
 - [Go Fiber]()
 - [RabbitMQ]() Message Broker
 - [Terraform]() Infrastructure as Code (IaC)
+- [Prometheus]()
+- [Grafana]()
 
 ## Running application using `docker-compose`
 
